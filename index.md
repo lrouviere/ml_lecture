@@ -1,37 +1,32 @@
-## Welcome to GitHub Pages
+### Documents de cours
 
-You can use the [editor on GitHub](https://github.com/lrouviere/ml_lecture/edit/master/index.md) to maintain and preview the content for your website in Markdown files.
+- [slides](https://lrouviere.github.io/pres_R.pdf)
+- [slides au format rapport](https://lrouviere.github.io/pres_R_article.pdf)
 
-Whenever you commit to this repository, GitHub Pages will run [Jekyll](https://jekyllrb.com/) to rebuild the pages in your site, from the content in your Markdown files.
+### Exercices, notebook
 
-### Markdown
+- [Fiche 1](https://lrouviere.github.io/fiche1.Rmd) : Environnement RStudio, Rmarkdown et Packages.
+- [Fiche 2](https://lrouviere.github.io/fiche2_stu.Rmd) : Les objets R.
+- [Fiche 3](https://lrouviere.github.io/fiche3_stu.Rmd) : Manipuler les données dans le tidyverse.
+- [Fiche 4](https://lrouviere.github.io/fiche4_stu.Rmd) : Visualiser les données (approche classique et ggplot2)
+  - graphes pour éditer la fiche : [Challenge 1](https://lrouviere.github.io/challenge1.pdf), [Challenge 2](https://lrouviere.github.io/challenge2.pdf), [Challenge 3](https://lrouviere.github.io/challenge3.pdf), [Challenge 4](https://lrouviere.github.io/challenge4.pdf)
 
-Markdown is a lightweight and easy-to-use syntax for styling your writing. It includes conventions for
 
-```markdown
-Syntax highlighted code block
+### Corrections
 
-# Header 1
-## Header 2
-### Header 3
+- [Fiche 1](https://lrouviere.github.io/fiche1.nb.html)
+- [Fiche 2](https://lrouviere.github.io/fiche2_cor.html)
+- [Fiche 3](https://lrouviere.github.io/fiche3_cor.html)
+- [Fiche 4](https://lrouviere.github.io/fiche4_cor.html)
 
-- Bulleted
-- List
 
-1. Numbered
-2. List
+### Jeux de données
 
-**Bold** and _Italic_ and `Code` text
-
-[Link](url) and ![Image](src)
-```
-
-For more details see [GitHub Flavored Markdown](https://guides.github.com/features/mastering-markdown/).
-
-### Jekyll Themes
-
-Your Pages site will use the layout and styles from the Jekyll theme you have selected in your [repository settings](https://github.com/lrouviere/ml_lecture/settings). The name of this theme is saved in the Jekyll `_config.yml` configuration file.
-
-### Support or Contact
-
-Having trouble with Pages? Check out our [documentation](https://help.github.com/categories/github-pages-basics/) or [contact support](https://github.com/contact) and we’ll help you sort it out.
+- Fiche 3
+  - [mydata.csv](https://lrouviere.github.io/mydata.csv)
+  - [mydata2.csv](https://lrouviere.github.io/mydata2.csv)
+  - [piscines.csv](https://lrouviere.github.io/piscines.csv)
+  
+- Fiche 4
+  - [ozone.txt](https://lrouviere.github.io/ozone.txt)
+  - [taches_solaires.csv](https://lrouviere.github.io/taches_solaires.csv)
