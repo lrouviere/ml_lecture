@@ -1,11 +1,11 @@
 ### Documents de cours
 
 - [slides](https://lrouviere.github.io/ml_lecture/cours.pdf)
-- [slides au format rapport](https://lrouviere.github.io/pres_R_article.pdf)
+- [slides au format rapport](https://lrouviere.github.io/ml_lecture/cours_article.pdf)
 
 ### Exercices, notebook
 
-- [Fiche 1](https://lrouviere.github.io/fiche1.Rmd) : Environnement RStudio, Rmarkdown et Packages.
+- Estimation du risque avec caret : [Rmd](https://lrouviere.github.io/ml_lecture/sujet_est_risque_caret.Rmd), [html](https://lrouviere.github.io/ml_lecture/sujet_est_risque_caret.nb.html)
 - [Fiche 2](https://lrouviere.github.io/fiche2_stu.Rmd) : Les objets R.
 - [Fiche 3](https://lrouviere.github.io/fiche3_stu.Rmd) : Manipuler les données dans le tidyverse.
 - [Fiche 4](https://lrouviere.github.io/fiche4_stu.Rmd) : Visualiser les données (approche classique et ggplot2)
