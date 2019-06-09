@@ -1,0 +1,400 @@
+---
+title: "TP Agrégation : boosting et forêts aléatoires"
+output:
+  html_notebook: 
+    css: ~/Dropbox/FICHIERS_STYLE/styles.css
+    toc: yes
+    toc_float: yes
+---
+
+```{r message=FALSE, warning=FALSE}
+library(tidyverse)
+```
+
+## Exercice 1 (Arbres de régression)
+
+On considère le jeu de données **Carseats** du package **ISLR**
+
+```{r}
+library(ISLR)
+data(Carseats)
+```
+
+Le problème est d'expliquer la variable continue **Sales** par les autres variables. On pourra trouver un descriptif des variables avec :
+```{r}
+help(Carseats)
+```
+
+
+1. Construire un arbre de régression à l'aide de la fonction **rpart** du package **rpart** et visualiser l'arbre avec **rpart.plot** (package **rpart.plot**)
+
+```{r}
+library(rpart)
+library(rpart.plot)
+tree <- rpart(Sales~.,data=Carseats)
+rpart.plot(tree)
+```
+
+
+On peut également utiliser **visTree** (package **visNetwork**) pour obtenir une viuslisation dynamique de l'arbre
+
+```{r}
+library(visNetwork)
+visTree(tree)
+```
+
+Une application **shiny** est également proposée dans ce package :
+
+```{r,eval=FALSE,include=TRUE}
+visTreeEditor(Carseats)
+```
+
+
+2. Expliquer les sorties de la commande **printcp**.
+
+```{r}
+printcp(tree)
+```
+
+On obtient des informations sur la suite d'arbres emboîtés qui optimise le critère `cout/complexité` :
+
+- **CP** représente la complexité de l'arbre, plus il est petit  plus l'arbre est profond.
+- **nsplit** est le nombre de coupures de l'arbre.
+- **rel error** représente l'erreur quadratique calculée sur les données d'apprenstissage (erreur d'ajustement). Cette erreur décroit lorsque la complexité augmente.
+- **xerror** contient l'erreur quadratique calculée par validation croisée 10 blocs (erreur de prévision).
+- **xstd** représente l'écart-type associé à l'erreur de validation croisée.
+
+
+3. Expliquer le protocole de sélection par la procédure d'élagage de la méthode CART. Que remarquez-vous ?
+
+L'approche classique consiste à choisir l'arbre qui a la plus petite erreur de prévision (colonne **xerror**). On remarque ici que l'erreur de prévision est décroissante, elle ne remonte pas au bout d'un certain moment. Il est donc possible que la suite d'abres ne soit pas assez grande.
+
+4. Sélectionner un arbre par la procédure CART et représenter le.
+
+On construit une sous-suite plus grande en modifiant les paramètres **cp** et **minsplit** :
+
+```{r}
+tree1 <- rpart(Sales~.,data=Carseats,cp=0.00001,minsplit=2)
+printcp(tree1)
+plotcp(tree1)
+```
+
+On choisit l'arbre qui a la plus petite erreur de prévision.
+
+```{r}
+cp_opt <- tree1$cptable %>% as.data.frame() %>% dplyr::filter(xerror==min(xerror)) %>% dplyr::select(CP) %>% as.numeric()
+opt.tree <- prune(tree,cp=cp_opt)
+rpart.plot(opt.tree)
+```
+
+5. On considère les individus suivants (dans la table **new.x**) :
+
+```{r}
+id.new <- sample(nrow(Carseats),10)
+new.x <- Carseats %>% slice(id.new) %>% select(-Sales)
+```
+
+Calculer les valeurs de **Sales** prédites par l'arbre construit.
+
+```{r}
+predict(opt.tree,newdata=new.x)
+```
+
+
+## Exercice 2 (forêts aléatoires)
+
+On considère le jeu de données **spam** du package **kernlab**.
+
+```{r message=FALSE, warning=FALSE}
+library(kernlab)
+data(spam)
+set.seed(1234)
+spam <- spam[sample(nrow(spam)),]
+```
+
+Le problème est d'expliquer la variable binaire **type** par les autres.
+
+1. A l'aide de la fonction **randomForest** du package **randomForest**, ajuster une forêt aléatoire pour répondre au problème posé.
+
+```{r message=FALSE, warning=FALSE}
+library(randomForest)
+rf1 <- randomForest(type~.,data=spam)
+```
+
+2. Appliquer la fonction **plot** à l'objet construit avec **randomForest** et expliquer le graphe obtenu. A quoi peut servir ce graphe en pratique ?
+
+
+```{r}
+plot(rf1)
+```
+Ce graphe permet de visualiser l'erreur de classication ainsi que les taux de faux positifs et faux négatifs calculés par Out Of Bag en fonction du nombre d'arbres de la forêt. Ce graphe peut être utilisé pour voir si l'algorithme a bien "convergé". Si ce n'est pas le cas, il faut construire une forêt avec plus d'abres.
+
+3. Construire la forêt avec **mtry=1** et comparer ses performances avec celle construite précédemment.
+
+```{r}
+rf2 <- randomForest(type~.,data=spam,mtry=1)
+rf1
+rf2
+```
+
+La forêt `rf1` est plus performante en terme d'erreur de classification OOB.
+
+4. Utiliser la fonction **train** du package **caret** pour choisir le paramètre **mtry** dans la grille **seq(1,30,by=5)**.
+
+```{r message=FALSE, warning=FALSE}
+library(caret)
+grille.mtry <- data.frame(mtry=seq(1,30,by=5))
+ctrl <- trainControl(method="oob")
+library(doParallel) ## pour paralléliser
+cl <- makePSOCKcluster(4)
+registerDoParallel(cl)
+set.seed(12345)
+sel.mtry <- train(type~.,data=spam,method="rf",trControl=ctrl,tuneGrid=grille.mtry)
+on.exit(stopCluster(cl))
+```
+On choisit
+```{r}
+sel.mtry$bestTune
+```
+
+
+5. Construire la forêt avec le paramètre **mtry** sélectionné. Calculer l'importance des variables et représenter ces importance à l'aide d'un diagramme en barres.
+
+```{r}
+rf3 <- randomForest(type~.,data=spam,mtry=unlist(sel.mtry$bestTune),importance=TRUE)
+Imp <- importance(rf3,type=1) %>% as.data.frame() %>% mutate(variable=names(spam)[-58]) %>% arrange(desc(MeanDecreaseAccuracy))
+head(Imp)
+```
+
+```{r}
+ggplot(Imp) + aes(x=reorder(variable,MeanDecreaseAccuracy),y=MeanDecreaseAccuracy)+geom_bar(stat="identity")+coord_flip()+xlab("")+theme_classic()
+```
+
+
+6. La fonction **ranger** du package **ranger** permet également de calculer des forêts aléatoires. Comparer les temps de calcul de cette fonction avec **randomForest**
+
+```{r message=FALSE, warning=FALSE}
+library(ranger)
+system.time(rf4 <- ranger(type~.,data=spam))
+system.time(rf5 <- randomForest(type~.,data=spam))
+```
+
+Le temps de calcul est plus rapide avec **ranger**. Ce package permet une implémentation efficace des forêts aléatoires pour des données de grande dimension. on peut touver plus d'information [ici](https://arxiv.org/pdf/1508.04409.pdf).
+
+
+## Exercice 3 (gradient boosting)
+
+On considère toujours le jeu de données **spam** du package **kernlab**.
+
+
+1. Exécuter les commandes
+
+```{r message=FALSE, warning=FALSE}
+library(gbm)
+```
+
+```{r, eval=FALSE, include=TRUE,echo=TRUE}
+model_ada1 <- gbm(type~.,data=spam,distribution="adaboost",interaction.depth=2,shrinkage=0.05,n.trees=500)
+```
+
+2. Proposer une correction permettant de faire fonctionner l'algorithme.
+
+Il est nécessaire que la variable qualitative à expliquer soit codée 0-1 pour adaboost
+
+```{r}
+spam1 <- spam
+spam1$type <- as.numeric(spam1$type)-1
+set.seed(1234)
+model_ada1 <- gbm(type~.,data=spam1,distribution="adaboost",interaction.depth=2,shrinkage=0.05,n.trees=500)
+```
+
+3. Expliciter le modèle ajusté par la commande précédente.
+
+L'algorithme **gbm** est une descente de gradient qui minimise la fonction de perte
+$$\frac{1}{n}\sum_{i=1}^n \ell(y_i,g(x_i)).$$
+Dans le cas de **adaboost** on utilise la perte exponentielle : $\ell(y,g(x))=\exp(-yg(x))$.
+
+4. Effectuer un **summary** du modèle ajusté.
+
+On effectue un résumé du modèle :
+```{r}
+summary(model_ada1)
+```
+
+On obtient un indicateur qui permet de mesurer l'importance des variable dans la construction de la méthode.
+
+5. Sélectionner le nombre d'itérations pour l'algorithme adaboost en faisant de la validation croisée 5 blocs.
+```{r}
+model_ada2 <- gbm(type~.,data=spam1,distribution="adaboost",interaction.depth=2,bag.fraction=1,cv.folds = 5,n.trees=500)
+gbm.perf(model_ada2)
+```
+
+
+6. Faire la même procédure en changeant la valeur du paramètre **shrinkage**. Interpréter.
+
+```{r}
+model_ada3 <- gbm(type~.,data=spam1,distribution="adaboost",interaction.depth=2,bag.fraction=1,cv.folds = 5,n.trees=500,shrinkage=0.05)
+gbm.perf(model_ada3)
+```
+
+
+```{r}
+model_ada4 <- gbm(type~.,data=spam1,distribution="adaboost",interaction.depth=2,bag.fraction=1,cv.folds = 5,n.trees=500,shrinkage=0.5)
+gbm.perf(model_ada4)
+```
+
+Le nombre d'itérations optimal augmente lorsque **shrinkage** diminue. C'est logique car ce dernier paramètre controle la vitesse de descente de gradient : plus il est grand, plus on minimise vite et moins on itère. Il faut néanmoins veiller à ne pas le prendre trop petit pour avoir un estimateur stable. Ici, 0.05 semble être une bonne valeur.
+
+
+
+
+## Exercice 4 (Comparaison de méthodes)
+
+Séparer le jeu de données **spam** en un échantillon d'apprentissage de taille 3000 et un échantillon test qui comprendra le reste des observations. Sur l'échantillon d'apprentissage uniquement, on constuira une règle de classification et un score en utilisant :
+
+* un arbre de classification ;
+* une SVM linéaire et une svm radiale ;
+* un algorithme adaboost et un algorithme logitboost ;
+* une forêt aléatoire.
+On pourra également rajouter une régression logistique lasso.
+On comparera les performances en estimant la probabilité d'erreur (pour les règles de classification) et la courbe ROC (pour les scores).
+
+
+On sépare les données 
+```{r}
+library(kernlab)
+data(spam)
+set.seed(123)
+ind.app <- sample(nrow(spam),3000)
+dapp <- spam %>% slice(ind.app)
+dtest <- spam %>% slice(-ind.app)
+```
+
+
+- Arbre
+```{r}
+library(rpart)
+library(rpart.plot)
+arbre <- rpart(type~.,data=dapp,cp=0.00001,minsplit=3)
+plotcp(arbre)
+cp_opt <- arbre$cptable[which.min(arbre$cptable[,"xerror"]),"CP"]
+arbre_sel <- prune(arbre,cp=cp_opt)
+rpart.plot(arbre_sel) 
+score <- data.frame(arbre=predict(arbre_sel,newdata=dtest,type="prob")[,2])
+```
+
+
+
+- Lasso
+
+```{r message=FALSE, warning=FALSE}
+library(glmnet)
+dapp1 <- model.matrix(type~.,data=dapp)[,-1]
+Yapp1 <- as.factor(as.numeric(dapp$type)-1)
+lasso.cv <- cv.glmnet(dapp1,Yapp1,alpha=1,family="binomial")
+plot(lasso.cv)
+
+dtest1 <- model.matrix(type~.,data=dtest)[,-1]
+Ytest1 <- as.factor(as.numeric(dtest$type)-1)
+score.lasso <- predict(lasso.cv,newx=dtest1,type="response") %>% unlist() %>% as.numeric()
+score <- score %>% mutate(lasso=score.lasso)
+```
+
+- SVM linéaire
+
+
+```{r message=FALSE, warning=FALSE}
+C <- c(0.001,0.01,1,10,100,1000)
+C <- c(1,10)
+gr <- expand.grid(C=C)
+ctrl <- trainControl(method="cv")
+cl <- makePSOCKcluster(4)
+registerDoParallel(cl)
+set.seed(12345)
+svm.lin <- train(type~.,data=dapp,method="svmLinear",trControl=ctrl,tuneGrid=gr,prob.model=TRUE)
+on.exit(stopCluster(cl))
+```
+
+- SVM radiale
+    
+    
+```{r}
+C <- c(0.001,0.01,1,100,1000)
+sigma <- c(0.05,0.1,0.5,1,5)
+gr <- expand.grid(C=C,sigma=sigma)
+ctrl <- trainControl(method="cv")
+registerDoParallel(cl)
+set.seed(12345)
+svm.rad <- train(type~.,data=dapp,method="svmRadial",trControl=ctrl,tuneGrid=gr,prob.model=TRUE)
+on.exit(stopCluster(cl))
+```
+
+```{r}
+score <- score %>% mutate(svm.lin=predict(svm.lin,newdata=dtest,type="prob")[,2],
+                          svm.rad=predict(svm.rad,newdata=dtest,type="prob")[,2])
+```
+
+
+
+- Adaboost et logitboost
+
+```{r}
+library(gbm)
+dapp2 <- dapp
+dtest2 <- dtest
+dapp2$type <- as.numeric(dapp2$type)-1
+dtest2$type <- as.numeric(dtest2$type)-1
+
+ada <- gbm(type~.,data=dapp2,distribution="adaboost",interaction.depth=2,shrinkage=0.05,cv.folds=5,bag.fraction=1,n.trees=500)
+Mopt.ada <- gbm.perf(ada,meth="cv")
+
+logit <- gbm(type~.,data=dapp2,distribution="bernoulli",interaction.depth=2,shrinkage=0.1,cv.folds=5,bag.fraction=1,n.trees=1000)
+Mopt.logit <- gbm.perf(logit,meth="cv")
+
+
+score <- score %>% mutate(ada=predict(ada,newdata=dtest,n.trees=Mopt.ada,type="response"),
+                           logit=predict(logit,newdata=dtest,n.trees=Mopt.logit,type="response"))
+
+```
+
+- Forêt
+
+```{r}
+library(randomForest)
+foret <- randomForest(type~.,data=dapp,xtest=dtest[,-ncol(dtest)],ytest=dtest[,ncol(dtest)],keep.forest=TRUE)
+
+score <- score %>% mutate(foret=foret$test$vote[,2])
+```
+
+
+### `Comparaison des méthodes`
+
+On créé une table qui contient toutes les informations pur calculer les critères.
+```{r}
+score1 <- score %>% mutate(obs=dtest$type) %>% gather(key="Method",value="Score",-obs) %>% 
+  mutate(Prev=recode(as.character(Score>0.5),"TRUE"="spam","FALSE"="nonspam"))
+```
+
+On en déduit :
+
+  * les erreurs de classifcation
+
+```{r}
+score1 %>% group_by(Method) %>% summarise(Err=mean(obs!=Prev)) %>% arrange(Err)
+```
+
+  * Les AUC
+  
+```{r}
+score1 %>% group_by(Method) %>% summarize(AUC=pROC::auc(obs,Score)) %>% arrange(desc(AUC))
+
+```
+  
+  * Les courbes ROC 
+  
+```{r message=FALSE, warning=FALSE}
+library(plotROC)
+ggplot(score1)+aes(d=obs,m=Score,color=Method)+geom_roc()+theme_classic()
+```
+  
+
