@@ -1,3 +1,5 @@
 theme: jekyll-theme-cayman
 title: Machine learning
 description: formation CEPE - Juin 2019
+github:
+	  is_project_page: false
