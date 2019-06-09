@@ -1,0 +1,120 @@
+---
+title: "Estimation du risque avec caret"
+output:
+  html_notebook: 
+#    css: styles.css
+---
+
+
+On cherche à expliquer une variable binaire $Y$ par deux variables quantitatives $X_1$ et $X_2$ à l'aide du jeu de données suivant
+
+```{r}
+n <- 2000
+set.seed(12345)
+X1 <- runif(n)
+set.seed(5678)
+X2 <- runif(n)
+set.seed(9012)
+R1 <- X1<=0.25
+R2 <- (X1>0.25 & X2>=0.75)
+R3 <- (X1>0.25 & X2<0.75)
+Y <- rep(0,n)
+Y[R1] <- rbinom(sum(R1),1,0.25)
+Y[R2] <- rbinom(sum(R2),1,0.25)
+Y[R3] <- rbinom(sum(R3),1,0.75)
+donnees <- data.frame(X1,X2,Y)
+donnees$Y <- as.factor(donnees$Y)
+```
+
+1. Séparer le jeu de données en un échantillon d'apprentissage de taille 1500 et un échantillon test de taille 500.
+
+
+2. On considère la régle de classification des $k$ plus proches voisins. Pour un entier $k$ plus petit que $n$ et un nouvel individu $x$, cette règle affecte à $x$ le label majoritaire des $k$ plus proches voisins de $x$. Sur **R** on utilise la fonction **knn** du package **class**. On peut par exemple obtenir les prévisions des individus de l'échantillon test de la règle des 3 plus proches voisins avec
+
+```{r}
+library(class)
+knn3 <- knn(dapp[,1:2],dtest[,1:2],cl=dapp$Y,k=3)
+head(knn3)
+```
+
+Calculer l'erreur de classification de la règle des 3 plus proches voisins sur les données test.
+
+
+3. Expliquer la fonction **knn.cv**
+
+On prédit le groupe de chaque individu par **validation croisée leave-one-out** :
+
+$$\widehat y_i=g_{k,i}(x_i),\quad i=1,\dots,n$$
+
+
+où $g_{k,i}$ désigne la règle de $k$ plus proche voisins construites à partir de l'échantillon amputé de la $i$ème observation.
+
+4. Calculer l'erreur de classification de la règle des 3 plus proches voisins par validation croisée **leave-one-out**.
+
+5. On considère le vecteur de plus proches voisins suivant :
+
+```{r}
+K_cand <- seq(1,500,by=20)
+```
+
+Proposer 2 façons de choisir une valeur de $k$ dans ce vecteur.
+
+  * On calcule l'erreur de classification par **validation hold** out pour chaque valeur de $k$ :
+  
+```{r}
+err.ho <- rep(0,length(K_cand))
+for (i in 1:length(K_cand)){
+  ...
+  ...
+}
+```
+  
+
+  * On fait la même chose avec la **validation croisée leave-one-out** :
+```{r}
+err.cv <- rep(0,length(K_cand))
+for (i in 1:length(K_cand)){
+  ...
+  ...
+} 
+```
+
+
+On souhaite maintenant utiliser le package **caret** pour estimer des critères d'erreur et sélectionner des paramètres. On garde le même cadre que précédemment où on cherche à sélectionner le paramètre $k$ de la règle des plus proches voisins. On pourra consulter l'url [http://topepo.github.io/caret/index.html](http://topepo.github.io/caret/index.html)
+
+6. Expliquer les sorties des commandes 
+
+```{r, message=FALSE, warning=FALSE}
+library(caret)
+ctrl1 <- trainControl(method="LGOCV",number=1,index=list(1:1500))
+KK <- data.frame(k=K_cand)
+ee1 <- train(Y~.,data=donnees,method="knn",trControl=ctrl1,tuneGrid=KK)
+ee1
+plot(ee1)
+```
+
+
+7. Utiliser **caret** pour sélectionner $k$ par validation croisée leave-one-out.
+
+
+
+8. Faire de même pour la validation croisée 10 blocs.
+
+
+
+Les validations croisés  peuvent se révéler couteuses en temps de calcul. On utlise souvent des techniques de parallélisation pour améliorer les performances computationnelles. Ces techniques sont relativement facile à mettre en oeuvre avec **caret**, on peut par exemple utiliser la librairie **doParallel** :
+
+
+```{r message=FALSE, warning=FALSE}
+library(doParallel)
+cl <- makePSOCKcluster(1)
+registerDoParallel(cl)
+system.time(ee3 <- train(Y~.,data=donnees,method="knn",trControl=ctrl3,tuneGrid=KK))
+stopCluster(cl)
+cl <- makePSOCKcluster(4)
+registerDoParallel(cl)
+system.time(ee3 <- train(Y~.,data=donnees,method="knn",trControl=ctrl3,tuneGrid=KK))
+stopCluster(cl)
+
+```
+
