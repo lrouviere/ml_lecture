@@ -5,7 +5,7 @@
 
 ### Exercices, notebook
 
-- [Exemple de fichier de style css pour notebook](https://lrouviere.github.io/ml_lecture/style.css)
+- [Exemple de fichier de style css pour notebook](https://lrouviere.github.io/ml_lecture/styles.css)
 - Estimation du risque avec caret : [Rmd](https://lrouviere.github.io/ml_lecture/sujet_est_risque_caret.Rmd), [html](https://lrouviere.github.io/ml_lecture/sujet_est_risque_caret.nb.html)
 - SVM : [Rmd](https://lrouviere.github.io/ml_lecture/sujet_svm.Rmd), [html](https://lrouviere.github.io/ml_lecture/sujet_svm.nb.html)
 - Agrégation : [Rmd](https://lrouviere.github.io/ml_lecture/agregation.Rmd), [html](https://lrouviere.github.io/ml_lecture/agregation.nb.html)
