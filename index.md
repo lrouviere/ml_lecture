@@ -14,19 +14,7 @@
 
 ### Corrections
 
-- [Fiche 1](https://lrouviere.github.io/fiche1.nb.html)
-- [Fiche 2](https://lrouviere.github.io/fiche2_cor.html)
-- [Fiche 3](https://lrouviere.github.io/fiche3_cor.html)
-- [Fiche 4](https://lrouviere.github.io/fiche4_cor.html)
-
-
-### Jeux de données
-
-- Fiche 3
-  - [mydata.csv](https://lrouviere.github.io/mydata.csv)
-  - [mydata2.csv](https://lrouviere.github.io/mydata2.csv)
-  - [piscines.csv](https://lrouviere.github.io/piscines.csv)
-  
-- Fiche 4
-  - [ozone.txt](https://lrouviere.github.io/ozone.txt)
-  - [taches_solaires.csv](https://lrouviere.github.io/taches_solaires.csv)
+- Estimation du risque avec caret : [html](https://lrouviere.github.io/ml_lecture/sujet_est_risque_caret.html)
+- SVM : [html](https://lrouviere.github.io/ml_lecture/sujet_svm.html)
+- Agrégation : [html](https://lrouviere.github.io/ml_lecture/agregation.html)
+- Réseaux de neurones : [html](https://lrouviere.github.io/ml_lecture/sujet_reseau_neurones.html)
