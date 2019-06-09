@@ -1,0 +1,185 @@
+---
+title: "TP : svm"
+output:
+  html_notebook: 
+    css: styles.css
+    toc: yes
+    toc_float: yes
+---
+
+## Exercice 1 (Cas séparable).
+
+Etant donné un échantillon séparable $(x_i,y_i),i=1,\dots,n$ où $x_i\in\mathbb R^2$ et $y_i\in\{0,1\}$, on rappelle que l'algorithme SVM consiste à trouver un hyperplan 
+$$\langle w,x\rangle+b=0$$ 
+qui sépare les $x_i$ en fonction des $y_i$. On génère des données selon
+
+```{r message=FALSE, warning=FALSE}
+library(tidyverse)
+n <- 20
+set.seed(123)
+X1 <- scale(runif(n))
+set.seed(567)
+X2 <- scale(runif(n))
+Y <- rep(0,n)
+Y[X1>X2] <- 1
+Y <- as.factor(Y)
+donnees <- data.frame(X1=X1,X2=X2,Y=Y)
+```
+
+Et on considère la **svm** suivante :
+
+```{r}
+library(e1071)
+mod.svm <- svm(Y~.,data=donnees,kernel="linear",cost=10000000000)
+```
+
+1. Représenter le nuage de points en utilisant une couleur différente selon la valeur de $Y$. 
+
+
+
+2. Récupérer les vecteurs supports et ajouter les sur le graphe. On les affectera à un **data.frame** dont les 2 premières colonnes représenteront les valeurs de $X_1$ et $X_2$ des vecteurs supports.
+
+
+Les vecteurs supports se trouvent dans l'élément **index** de la fonction **svm** :
+```{r}
+ind.svm <- ...
+sv <- ...
+sv
+```
+
+
+On peut ainsi représenter la marge en traçant les droites qui passent par ces points.
+
+```{r}
+sv1 <- sv[,2:1]
+b <- (sv1[1,2]-sv1[2,2])/(sv1[1,1]-sv1[2,1])
+a <- sv1[1,2]-b*sv1[1,1]
+a1 <- sv1[3,2]-b*sv1[3,1]
+p1+geom_abline(intercept = c(a,a1),slope=b,col="blue",size=1)
+```
+
+3. Retrouver ce graphe à l'aide de la fonction **plot**.
+
+
+
+4. Rappeler la règle de décision associée la méthode SVM. Donner les estimations des paramètres de la règle de décision sur cet exemple.
+
+L'hyperplan séparateur est d'équation
+
+$$\langle w^\star,x\rangle+b^\star=0$$
+avec
+
+$$w^\star=\sum_{i=1}^n\alpha_i^\star y_ix_i$$
+et $b^\star$ solution de $y_i<w^\star,x_i>+b=0$ (pour $\alpha_i^\star\neq 0$). La règle s'écrit donc
+$$g(x)=1_{<w^\star,x>+b^\star\leq 0}-1_{<w^\star,x>+b^\star> 0}.$$
+L'élément **mod.svm$coefs** contient les coefficients $\alpha_i^\star y_i$ pour chaque vecteur support. On peut ainsi récupérer l'équation de l'hyperplan et faire la prévision avec
+```{r}
+w <- ...
+b <- ...
+```
+L'hyperplan séparateur a donc pour équation : ...
+
+
+5. On dispose d'un nouvel individu $x=(-0.5,0.5)$. Expliquer comment on peut prédire son groupe.
+
+
+6. Retrouver les résultats de la question précédente à l'aide de la fonction **predict**. On pourra utiliser l'option `decision.values = TRUE`.
+
+
+Plus cette valeur est élevée, plus on est loin de l'hyperplan. On peut donc l'interpréter comme un score. Comme souvent, il est possible d'obtenir une estimation des probabilités d'être dans les groupes 0 et 1 à partir de ce score, il "suffit" de ramener ce score sur l'échelle $[0,1]$ avec des transformations de type logit par exemple. Pour la svm, ces probabilités sont obtenues en ajustant un modèle logistique sur les scores $S(x)$ :
+$$P(Y=1|X=x)=\frac{1}{1+\exp(aS(x)+b)}.$$
+
+7. Obtenir ces probabilités à l'aide de la fonction **predict**. On pourra utiliser `probability=TRUE` dans la fonction **svm**.
+
+
+
+
+
+## Exercice 2 (cas non séparable).
+
+On considère le jeu de données suivant où le problème est d'expliquer $Y$ par $V1$ et $V2$.
+
+```{r}
+n <- 750
+set.seed(1)
+X <- matrix(runif(n*2,-2,2),ncol=2) %>% as.data.frame()
+Y <- rep(0,n)
+cond <- (X$V1^2+X$V2^2)<=2.8
+Y[cond] <- rbinom(sum(cond),1,0.9)
+Y[!cond] <- rbinom(sum(!cond),1,0.1)
+df <- X %>% mutate(Y=as.factor(Y))
+```
+
+
+```{r}
+ggplot(df)+aes(x=V1,y=V2,color=Y)+geom_point()+theme_classic()
+```
+
+
+
+
+1. Séparer l'échantillon en un échantillon d'apprentissage de taille 500 et un échantillon test de taille 250.
+
+
+
+2. Ajuster une svm linéaire sur l'échantillon d'apprentissage et visualiser l'hyperplan séparateur. Que remarquez-vous ?
+
+
+3. En quoi consiste l'astuce noyau pour les svm ?
+
+L'astuce du noyau consiste à envoyer les données dans un espace de représentation (feature space) dans lequel on espère que les données soient linéairement séparables.
+
+4. Exécuter la commande suivante et commenter la sortie.
+
+```{r}
+mod.svm1 <- svm(Y~.,data=train,kernel="radial",gamma=1,cost=1)
+plot(mod.svm1,train,grid=250)
+```
+
+
+5. Faire varier les paramètres **gamma** et **cost**. Interpréter (on pourra notamment étudier l'évolution du nombre de vecteurs supports en fonction du paramètre **cost**).
+
+
+6. Sélectionner automatiquement ces paramètres. On pourra utiliser la fonction **tune** en faisant varier **C** dans **c(0.1,1,10,100,1000)** et **gamma** dans **c(0.5,1,2,3,4)**.
+
+```{r}
+set.seed(1234)
+tune.out <- tune(svm,...)
+summary(tune.out)
+```
+
+La sélection est faite en minimisant l'erreur de classification par validation croisée 10 blocs.
+
+7. Faire de même avec **caret**, on utilisera **method="svmRadial"** et **prob.model=TRUE**.
+
+Pour caret il faut utiliser la méthode **svmRadial** du package *kernlab*.
+```{r message=FALSE, warning=FALSE}
+library(caret)
+library(kernlab)
+C <- c(0.001,0.01,1,10,100,1000)
+sigma <- c(0.5,1,2,3,4)
+gr <- expand.grid(C=C,sigma=sigma)
+ctrl <- trainControl(...)
+res.caret1 <- train(Y~.,...)
+res.caret1
+```
+
+
+8. Comparer la svm sélectionnée à la svm linéaire à l'aide de la courbe ROC et de l'erreur de classification. On pourra créer une table qui contient les scores et les labels observés des individus de l'échantillon test. On pourra également ajouter une svm polynomiale.
+
+
+
+9. A l'aide de **caret**, sélectionner les paramètres de la svm en optimisant l'AUC.
+
+On peut utliser l'option **metric** de la fonction **train** :
+
+
+```{r}
+ctrl <- trainControl(method="cv",classProbs = TRUE,summary = twoClassSummary)
+train1 <- train %>% mutate(Y=fct_recode(Y,G0="0",G1="1"))
+res.caret4 <- train(Y~.,data=train1,method="svmPoly",trControl=ctrl,tuneGrid=gr,prob.model=TRUE,metric="ROC")
+res.caret4
+```
+
+
+
