@@ -16,5 +16,5 @@
 
 - Estimation du risque avec caret : [html](https://lrouviere.github.io/ml_lecture/sujet_est_risque_caret.html)
 - SVM : [html](https://lrouviere.github.io/ml_lecture/sujet_svm.html)
-- Agrégation : [html](https://lrouviere.github.io/ml_lecture/agregation.html)
+- Agrégation : [html](https://www.dropbox.com/s/xex4s54nuhgpg7p/agregation.html?dl=0)
 - Réseaux de neurones : [html](https://lrouviere.github.io/ml_lecture/sujet_reseau_neurones.html)
