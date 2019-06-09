@@ -1,0 +1,114 @@
+---
+title: "Réseaux de neurones avec Keras"
+output:
+  html_notebook: 
+#    css: styles.css
+---
+
+
+```{r message=FALSE, warning=FALSE}
+library(tidyverse)
+library(keras)
+#install_keras() 1 seule fois sur la machine
+```
+
+On considère le jeu de données **spam**
+
+```{r message=FALSE, warning=FALSE}
+library(kernlab)
+data(spam)
+spamX <- as.matrix(spam[,-58])
+#spamY <- to_categorical(as.numeric(spam$type)-1, 2)
+spamY <- as.numeric(spam$type)-1
+```
+
+que l'on sépare en un échantillon d'apprentissage et un échantillon test
+
+```{r}
+set.seed(5678)
+perm <- sample(4601,3000)
+appX <- spamX[perm,]
+appY <- spamY[perm]
+validX <- spamX[-perm,]
+validY <- spamY[-perm]
+```
+
+1. A l'aide des données d'apprentissage, entrainer un perceptron simple avec une fonction d'activation **sigmoïde**. On utilisera 30 epochs et des batchs de taille 5.
+
+
+On définit tout d'abord la structure du réseau, 1 seule couche ici de 1 neurone :
+```{r}
+percep.sig <- keras_model_sequential() 
+percep.sig %>% layer_dense(...)
+```
+
+```{r}
+summary(percep.sig)
+```
+
+On donne ensuite la fonction de perte, l'algorithme d'optimisation ainsi que le critère pour mesurer la performance du réseau :
+
+```{r}
+percep.sig %>% compile(
+  ...
+)
+```
+
+On donne enfin dans **fit** les paramètres qui permettent d'entrainer le modèle (taille des batchs, nombre d'epochs...)
+
+```{r message=FALSE, warning=FALSE}
+p.sig <- percep.sig %>% fit(
+  ...
+)
+```
+
+La fonction **plot** permet de visualiser la perte et pa performance en fonction du nombre d'epochs :
+
+```{r}
+plot(p.sig)
+```
+
+2. Faire de même avec la fonction d'activation **softmax**. On utilisera pour cela 2 neurones avec une sortie $Y$ possédant la forme suivante.
+
+```{r}
+spamY1 <- to_categorical(as.numeric(spam$type)-1, 2)
+appY1 <- spamY1[perm,]
+validY1 <- spamY1[-perm,]
+```
+
+
+
+```{r}
+percep.soft <- keras_model_sequential() 
+percep.soft %>% layer_dense(...)
+```
+
+```{r}
+summary(percep.soft)
+```
+
+
+```{r}
+percep.soft %>% compile(
+  ...
+)
+```
+
+
+```{r}
+p.soft <- percep.soft %>% fit(
+  ...
+)
+```
+
+```{r}
+plot(p.soft)
+```
+
+3. Comparer les performances des deux perceptrons sur les données de validation à l'aide de la fonction **evaluate**.
+
+
+
+4. Construire un ou deux réseaux avec deux couches cachées. On pourra faire varier les nombre de neurones dans ces couches. Comparer les performances des réseaux construits.
+
+
