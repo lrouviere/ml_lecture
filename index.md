@@ -16,5 +16,6 @@
 
 - Estimation du risque avec caret : [html](https://www.dropbox.com/s/yjibb2t8obzd2kd/est_risque_caret.html?dl=0)
 - SVM : [html](https://www.dropbox.com/s/3ibse2n7eu0imqe/svm.html?dl=0)
+- SVM1 : [html](svm.html)
 - Agrégation : [html](https://www.dropbox.com/s/xex4s54nuhgpg7p/agregation.html?dl=0)
 - Réseaux de neurones : [html](https://www.dropbox.com/s/qnk34o1tiqw1nb9/reseau_neurones.html?dl=0)
