@@ -1,6 +1,11 @@
+---
+title: Machine Learning
+---
+
+
 ### Documents de cours
 
-- [slides](https://lrouviere.github.io/ml_lecture/cours.pdf)
+- [slides](cours.pdf)
 - [slides au format rapport](https://lrouviere.github.io/ml_lecture/cours_article.pdf)
 
 ### Exercices, notebook
