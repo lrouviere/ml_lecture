@@ -1,5 +1,5 @@
 ---
-title: Statistique en grande dimension
+title: Machine learning
 ---
 
 
