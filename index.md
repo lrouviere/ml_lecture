@@ -1,3 +1,7 @@
+---
+title: Statistique en grande dimension
+---
+
 
 ### Documents de cours
 
