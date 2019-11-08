@@ -1,7 +1,3 @@
----
-title: Machine learning
----
-
 
 ### Documents de cours
 
