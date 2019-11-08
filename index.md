@@ -1,20 +1,16 @@
----
-title: Machine Learning
----
-
 
 ### Documents de cours
 
 - [slides](cours.pdf)
-- [slides au format rapport](https://lrouviere.github.io/ml_lecture/cours_article.pdf)
+- [slides au format rapport](cours_article.pdf)
 
 ### Exercices, notebook
 
-- Exemple de fichier de style css pour notebook : [styles.css](https://lrouviere.github.io/ml_lecture/styles.css)
-- Estimation du risque avec caret : [Rmd](https://lrouviere.github.io/ml_lecture/sujet_est_risque_caret.Rmd), [html](https://lrouviere.github.io/ml_lecture/sujet_est_risque_caret.nb.html)
-- SVM : [Rmd](https://lrouviere.github.io/ml_lecture/sujet_svm.Rmd), [html](https://lrouviere.github.io/ml_lecture/sujet_svm.nb.html)
-- Agrégation : [Rmd](https://lrouviere.github.io/ml_lecture/agregation.Rmd), [html](https://lrouviere.github.io/ml_lecture/agregation.nb.html)
-- Réseaux de neurones : [Rmd](https://lrouviere.github.io/ml_lecture/sujet_reseau_neurones.Rmd), [html](https://lrouviere.github.io/ml_lecture/sujet_reseau_neurones.nb.html)
+- Exemple de fichier de style css pour notebook : [styles.css](styles.css)
+- Estimation du risque avec caret : [Rmd](sujet_est_risque_caret.Rmd), [html](sujet_est_risque_caret.nb.html)
+- SVM : [Rmd](sujet_svm.Rmd), [html](sujet_svm.nb.html)
+- Agrégation : [Rmd](agregation.Rmd), [html](agregation.nb.html)
+- Réseaux de neurones : [Rmd](sujet_reseau_neurones.Rmd), [html](sujet_reseau_neurones.nb.html)
 
 
 ### Corrections
